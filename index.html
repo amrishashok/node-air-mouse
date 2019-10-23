@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Accelerometer</title>
+</head>
+
+<body>
+    <div>X-axis: <span id="xaxis"></span></div>
+    <div>Y-axis: <span id="yaxis"></span></div>
+    <div>Z-axis: <span id="zaxis"></span></div>
+    <textarea id="keyboard"></textarea>
+    <div style="position: absolute;bottom: 0; width: 100%">
+        <button id="left-btn" style="display: inline-block;width: 100%; height: 80px;">Left</button>
+        <button id="right-btn" style="display: inline-block;width: 100%; height: 80px;">Right</button>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let accelerometer = new Accelerometer({ frequency: 45 });
+        const socket = io('https://192.168.1.9:8080');
+
+        accelerometer.addEventListener('reading', e => {
+
+            document.getElementById('xaxis').innerHTML = Math.round(accelerometer.x, 2);
+            document.getElementById('yaxis').innerHTML = Math.round(accelerometer.y, 2);
+            document.getElementById('zaxis').innerHTML = Math.round(accelerometer.z, 2);
+            if ((accelerometer.x >= 1 || accelerometer.x <= -1)) {
+                socket.emit('accelerometerX', accelerometer.x);
+            }
+
+            if ((accelerometer.y >= 1 || accelerometer.y <= -1)) {
+                socket.emit('accelerometerY', accelerometer.y);
+            }
+        });
+        accelerometer.start();
+
+        document.getElementById('right-btn').addEventListener('click',
+            function () {
+                socket.emit('button', 'right')
+            });
+
+        document.getElementById('left-btn').addEventListener('click',
+            function () {
+                socket.emit('button', 'left')
+            });
+            document.getElementById('keyboard').addEventListener('keyup', function($event) {
+                alert($event.key);
+                socket.emit('keyboard', $event.key);;
+            })
+    </script>
+</body>
+
+</html>
